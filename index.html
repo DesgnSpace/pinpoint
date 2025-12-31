@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pinpoint - Get Exact Image Coordinates & Position Tool</title>
+  <meta name="description" content="Free online tool to get exact pixel coordinates and percentage positions from any image. Click anywhere on your image to get X, Y positions, percentages, and view image metadata.">
+  <meta name="keywords" content="image coordinates, pixel position, image position tool, get coordinates from image, image metadata, EXIF data, click coordinates">
+  <meta name="author" content="Pinpoint">
+  <link rel="canonical" href="https://pinpoint.tools">
+
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://pinpoint.tools">
+  <meta property="og:title" content="Pinpoint - Get Exact Image Coordinates & Position Tool">
+  <meta property="og:description" content="Free online tool to get exact pixel coordinates and percentage positions from any image. View image metadata and EXIF data.">
+  <meta property="og:site_name" content="Pinpoint">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Pinpoint - Get Exact Image Coordinates & Position Tool">
+  <meta name="twitter:description" content="Free online tool to get exact pixel coordinates and percentage positions from any image.">
+
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="hsl(220, 90%, 56%)">
+
+  <script src="https://cdn.jsdelivr.net/npm/exif-js"></script>
+  <style>
+    :root {
+      --bg-main: #ffffff;
+      --bg-surface: #ffffff;
+      --bg-hover: #f4f4f4;
+      --border-subtle: #e5e5e5;
+      --border-strong: #000000;
+      --text-main: #000000;
+      --text-muted: #737373;
+      --accent: #000000;
+      --accent-hover: #333333;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'SF Mono', 'Segoe UI Mono', 'Roboto Mono', Menlo, monospace;
+      background: var(--bg-main);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .main-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 24px;
+    }
+
+    .sidebar {
+      width: 320px;
+      background: var(--bg-surface);
+      border-left: 1px solid var(--border-subtle);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+      overflow-y: auto;
+      max-height: 100vh;
+    }
+
+    .sidebar h2 {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 8px;
+    }
+
+    .drop-zone {
+      border: 1px solid var(--border-subtle);
+      border-radius: 4px;
+      padding: 64px 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: var(--bg-surface);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .drop-zone:hover,
+    .drop-zone.dragover {
+      border-color: var(--accent);
+      background: var(--bg-hover);
+    }
+
+    .drop-zone-text {
+      color: var(--text-muted);
+      font-size: 13px;
+      margin-bottom: 24px;
+    }
+
+    .drop-zone-text strong {
+      color: var(--text-main);
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    .url-input-wrapper {
+      display: flex;
+      gap: 0;
+      width: 100%;
+      max-width: 400px;
+      border: 1px solid var(--border-subtle);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .url-input {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      font-family: inherit;
+      font-size: 13px;
+      outline: none;
+      background: transparent;
+    }
+
+    .url-input:focus {
+      background: var(--bg-hover);
+    }
+
+    .btn {
+      padding: 12px 24px;
+      background: var(--accent);
+      color: white;
+      border: 1px solid var(--accent);
+      border-radius: 0;
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn:hover {
+      background: white;
+      color: var(--accent);
+    }
+
+    /* specific fix for input button group */
+    .url-input-wrapper .btn {
+      border: none;
+      border-left: 1px solid var(--border-subtle);
+      border-radius: 0;
+    }
+
+    .image-container {
+      flex: 1;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg-hover);
+      border-radius: 4px;
+      overflow: hidden;
+      padding: 24px;
+    }
+
+    .image-container.visible {
+      display: flex;
+    }
+
+    .image-wrapper {
+      position: relative;
+      display: inline-block;
+      cursor: crosshair;
+      max-width: 100%;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    }
+
+    .image-wrapper img {
+      display: block;
+      max-height: calc(100vh - 100px);
+      max-width: 100%;
+      width: auto;
+      height: auto;
+    }
+
+    .marker {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      border: 1px solid var(--accent);
+      border-radius: 50%;
+      background: transparent;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+    
+    .marker::before, .marker::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      background: var(--accent);
+      transform: translate(-50%, -50%);
+    }
+    
+    .marker::before { width: 100%; height: 1px; }
+    .marker::after { width: 1px; height: 100%; }
+
+    .info-section {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding: 8px 6px;
+      border-bottom: 1px dashed var(--border-subtle);
+      cursor: pointer;
+      position: relative;
+      transition: background 0.1s;
+      margin: 0 -6px;
+      border-radius: 2px;
+    }
+
+    .info-row:hover {
+      background: var(--bg-hover);
+    }
+    
+    .info-row:hover .info-value {
+      text-decoration: underline;
+    }
+
+    .info-row:last-child {
+      border-bottom: none;
+    }
+    
+    .copy-feedback {
+      position: absolute;
+      right: 6px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: var(--text-main);
+      color: var(--bg-main);
+      padding: 2px 6px;
+      font-size: 10px;
+      font-weight: 600;
+      border-radius: 2px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .copy-feedback.visible {
+      opacity: 1;
+    }
+
+    .info-label {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .info-value {
+      font-size: 13px;
+      font-weight: 500;
+      font-variant-numeric: tabular-nums;
+      text-align: right;
+      word-break: break-all;
+      margin-left: 12px;
+    }
+
+    .info-value.highlight {
+      background: var(--accent);
+      color: white;
+      padding: 2px 6px;
+      border-radius: 2px;
+    }
+
+    .empty-state {
+      color: var(--text-muted);
+      font-size: 13px;
+      font-style: italic;
+      padding: 12px 0;
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .branding {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-align: right;
+    }
+
+    .branding a {
+      color: var(--text-main);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .branding a:hover {
+      text-decoration: underline;
+    }
+
+    .reset-btn {
+      background: transparent;
+      color: var(--text-main);
+      border: 1px solid var(--border-subtle);
+      width: 100%;
+    }
+
+    .reset-btn:hover {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <main class="main-area">
+    <div class="drop-zone" id="dropZone">
+      <div class="drop-zone-text">
+        Drag & drop an image here<br>
+        or <strong id="browseBtn">browse files</strong><br>
+        or paste from clipboard (Ctrl+V)
+      </div>
+      <div class="url-input-wrapper">
+        <input type="text" class="url-input" id="urlInput" placeholder="Or enter image URL...">
+        <button class="btn" id="loadUrlBtn">Load</button>
+      </div>
+    </div>
+    <input type="file" id="fileInput" accept="image/*">
+
+    <div class="image-container" id="imageContainer">
+      <div class="image-wrapper" id="imageWrapper">
+        <img id="mainImage" src="" alt="Loaded image">
+        <div class="marker" id="marker" style="display: none;"></div>
+      </div>
+    </div>
+  </main>
+
+  <aside class="sidebar">
+    <section class="info-section">
+      <h2>Image Info</h2>
+      <div id="imageInfo">
+        <p class="empty-state">No image loaded</p>
+      </div>
+    </section>
+
+    <section class="info-section">
+      <h2>Click Position</h2>
+      <div id="positionInfo">
+        <p class="empty-state">Click on image to get position</p>
+      </div>
+    </section>
+
+    <section class="info-section">
+      <h2>Metadata</h2>
+      <div id="metadataInfo">
+        <p class="empty-state">No image loaded</p>
+      </div>
+    </section>
+
+    <div class="sidebar-footer">
+      <button class="btn reset-btn" id="resetBtn" style="display: none;">Load New Image</button>
+      <div class="branding">
+        pinpoint by <a href="https://desgn.space" target="_blank">desgn.space</a>
+      </div>
+    </div>
+  </aside>
+
+  <script>
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const browseBtn = document.getElementById('browseBtn');
+    const urlInput = document.getElementById('urlInput');
+    const loadUrlBtn = document.getElementById('loadUrlBtn');
+    const imageContainer = document.getElementById('imageContainer');
+    const imageWrapper = document.getElementById('imageWrapper');
+    const mainImage = document.getElementById('mainImage');
+    const marker = document.getElementById('marker');
+    const imageInfo = document.getElementById('imageInfo');
+    const positionInfo = document.getElementById('positionInfo');
+    const metadataInfo = document.getElementById('metadataInfo');
+    const resetBtn = document.getElementById('resetBtn');
+    const sidebar = document.querySelector('.sidebar');
+
+    // Sidebar copy functionality
+    sidebar.addEventListener('click', async (e) => {
+      const row = e.target.closest('.info-row');
+      if (!row) return;
+
+      const valueEl = row.querySelector('.info-value');
+      if (!valueEl) return;
+
+      const text = valueEl.innerText;
+      
+      try {
+        await navigator.clipboard.writeText(text);
+        
+        // Show feedback
+        let feedback = row.querySelector('.copy-feedback');
+        if (!feedback) {
+          feedback = document.createElement('span');
+          feedback.className = 'copy-feedback';
+          feedback.innerText = 'COPIED';
+          row.appendChild(feedback);
+        }
+        
+        // Force reflow
+        void feedback.offsetWidth;
+        
+        feedback.classList.add('visible');
+        
+        setTimeout(() => {
+          feedback.classList.remove('visible');
+          setTimeout(() => {
+            if (feedback.parentNode === row) {
+              row.removeChild(feedback);
+            }
+          }, 200);
+        }, 1000);
+        
+      } catch (err) {
+        console.error('Failed to copy:', err);
+      }
+    });
+
+    let imageNaturalWidth = 0;
+    let imageNaturalHeight = 0;
+    let currentFile = null;
+
+    browseBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      fileInput.click();
+    });
+
+    dropZone.addEventListener('click', () => fileInput.click());
+
+    dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropZone.classList.add('dragover');
+    });
+
+    dropZone.addEventListener('dragleave', () => {
+      dropZone.classList.remove('dragover');
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('dragover');
+      const file = e.dataTransfer.files[0];
+      if (file && file.type.startsWith('image/')) {
+        loadImageFromFile(file);
+      }
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        loadImageFromFile(file);
+      }
+    });
+
+    urlInput.addEventListener('click', (e) => {
+      e.stopPropagation();
+    });
+
+    loadUrlBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const url = urlInput.value.trim();
+      if (url) {
+        loadImageFromUrl(url);
+      }
+    });
+
+    urlInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        const url = urlInput.value.trim();
+        if (url) {
+          loadImageFromUrl(url);
+        }
+      }
+    });
+
+    document.addEventListener('paste', (e) => {
+      const items = e.clipboardData.items;
+      for (const item of items) {
+        if (item.type.startsWith('image/')) {
+          const file = item.getAsFile();
+          loadImageFromFile(file);
+          return;
+        }
+      }
+
+      const text = e.clipboardData.getData('text');
+      if (text && (text.startsWith('http://') || text.startsWith('https://'))) {
+        loadImageFromUrl(text);
+      }
+    });
+
+    function loadImageFromFile(file) {
+      currentFile = file;
+      const reader = new FileReader();
+      reader.onload = (e) => displayImage(e.target.result, file);
+      reader.readAsDataURL(file);
+    }
+
+    function loadImageFromUrl(url) {
+      currentFile = null;
+      displayImage(url, null);
+    }
+
+    function formatFileSize(bytes) {
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    }
+
+    function formatExifDate(exifDate) {
+      if (!exifDate) return null;
+      const parts = exifDate.split(' ');
+      if (parts.length < 2) return exifDate;
+      const dateParts = parts[0].split(':');
+      if (dateParts.length !== 3) return exifDate;
+      const date = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
+      return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+    }
+
+    function extractMetadata(file, img) {
+      let metadataHtml = '';
+
+      if (file) {
+        metadataHtml += `
+          <div class="info-row">
+            <span class="info-label">File Name</span>
+            <span class="info-value">${file.name}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">File Size</span>
+            <span class="info-value">${formatFileSize(file.size)}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">File Type</span>
+            <span class="info-value">${file.type || 'Unknown'}</span>
+          </div>
+        `;
+
+        if (file.lastModified) {
+          const modDate = new Date(file.lastModified);
+          metadataHtml += `
+            <div class="info-row">
+              <span class="info-label">Last Modified</span>
+              <span class="info-value">${modDate.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
+            </div>
+          `;
+        }
+      }
+
+      EXIF.getData(img, function() {
+        const make = EXIF.getTag(this, 'Make');
+        const model = EXIF.getTag(this, 'Model');
+        const dateOriginal = EXIF.getTag(this, 'DateTimeOriginal');
+        const fNumber = EXIF.getTag(this, 'FNumber');
+        const exposureTime = EXIF.getTag(this, 'ExposureTime');
+        const iso = EXIF.getTag(this, 'ISOSpeedRatings');
+        const focalLength = EXIF.getTag(this, 'FocalLength');
+
+        if (dateOriginal) {
+          metadataHtml += `
+            <div class="info-row">
+              <span class="info-label">Date Taken</span>
+              <span class="info-value">${formatExifDate(dateOriginal)}</span>
+            </div>
+          `;
+        }
+
+        if (make || model) {
+          const camera = [make, model].filter(Boolean).join(' ');
+          metadataHtml += `
+            <div class="info-row">
+              <span class="info-label">Camera</span>
+              <span class="info-value">${camera}</span>
+            </div>
+          `;
+        }
+
+        if (fNumber) {
+          metadataHtml += `
+            <div class="info-row">
+              <span class="info-label">Aperture</span>
+              <span class="info-value">f/${fNumber}</span>
+            </div>
+          `;
+        }
+
+        if (exposureTime) {
+          const exposure = exposureTime < 1 ? `1/${Math.round(1/exposureTime)}s` : `${exposureTime}s`;
+          metadataHtml += `
+            <div class="info-row">
+              <span class="info-label">Exposure</span>
+              <span class="info-value">${exposure}</span>
+            </div>
+          `;
+        }
+
+        if (iso) {
+          metadataHtml += `
+            <div class="info-row">
+              <span class="info-label">ISO</span>
+              <span class="info-value">${iso}</span>
+            </div>
+          `;
+        }
+
+        if (focalLength) {
+          metadataHtml += `
+            <div class="info-row">
+              <span class="info-label">Focal Length</span>
+              <span class="info-value">${focalLength}mm</span>
+            </div>
+          `;
+        }
+
+        metadataInfo.innerHTML = metadataHtml || '<p class="empty-state">No metadata available</p>';
+      });
+
+      if (!file && metadataHtml === '') {
+        metadataInfo.innerHTML = '<p class="empty-state">No metadata available</p>';
+      } else if (metadataHtml) {
+        metadataInfo.innerHTML = metadataHtml;
+      }
+    }
+
+    function displayImage(src, file) {
+      mainImage.src = src;
+      mainImage.onload = () => {
+        imageNaturalWidth = mainImage.naturalWidth;
+        imageNaturalHeight = mainImage.naturalHeight;
+
+        dropZone.style.display = 'none';
+        imageContainer.classList.add('visible');
+        resetBtn.style.display = 'block';
+        marker.style.display = 'none';
+
+        const aspectRatio = (imageNaturalWidth / imageNaturalHeight).toFixed(2);
+
+        imageInfo.innerHTML = `
+          <div class="info-row">
+            <span class="info-label">Width</span>
+            <span class="info-value">${imageNaturalWidth}px</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Height</span>
+            <span class="info-value">${imageNaturalHeight}px</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Aspect Ratio</span>
+            <span class="info-value">${aspectRatio}</span>
+          </div>
+        `;
+
+        positionInfo.innerHTML = '<p class="empty-state">Click on image to get position</p>';
+        extractMetadata(file, mainImage);
+      };
+
+      mainImage.onerror = () => {
+        alert('Failed to load image. Please check the URL or try another image.');
+      };
+    }
+
+    mainImage.addEventListener('click', (e) => {
+      const imageRect = mainImage.getBoundingClientRect();
+      const wrapperRect = imageWrapper.getBoundingClientRect();
+
+      const clickX = e.clientX - imageRect.left;
+      const clickY = e.clientY - imageRect.top;
+
+      const displayedWidth = mainImage.offsetWidth;
+      const displayedHeight = mainImage.offsetHeight;
+
+      const scaleX = imageNaturalWidth / displayedWidth;
+      const scaleY = imageNaturalHeight / displayedHeight;
+
+      const actualX = Math.round(clickX * scaleX);
+      const actualY = Math.round(clickY * scaleY);
+
+      const percentX = ((actualX / imageNaturalWidth) * 100).toFixed(2);
+      const percentY = ((actualY / imageNaturalHeight) * 100).toFixed(2);
+
+      const markerX = clickX + (imageRect.left - wrapperRect.left);
+      const markerY = clickY + (imageRect.top - wrapperRect.top);
+
+      marker.style.display = 'block';
+      marker.style.left = `${markerX}px`;
+      marker.style.top = `${markerY}px`;
+
+      positionInfo.innerHTML = `
+        <div class="info-row">
+          <span class="info-label">X Position</span>
+          <span class="info-value">${actualX}px</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Y Position</span>
+          <span class="info-value">${actualY}px</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">X Percent</span>
+          <span class="info-value highlight">${percentX}%</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Y Percent</span>
+          <span class="info-value highlight">${percentY}%</span>
+        </div>
+      `;
+    });
+
+    resetBtn.addEventListener('click', () => {
+      // Clear handlers to prevent errors when clearing src
+      mainImage.onload = null;
+      mainImage.onerror = null;
+      
+      dropZone.style.display = '';
+      imageContainer.classList.remove('visible');
+      resetBtn.style.display = 'none';
+      mainImage.src = '';
+      mainImage.removeAttribute('src');
+      
+      urlInput.value = '';
+      fileInput.value = '';
+      currentFile = null;
+      imageInfo.innerHTML = '<p class="empty-state">No image loaded</p>';
+      positionInfo.innerHTML = '<p class="empty-state">Click on image to get position</p>';
+      metadataInfo.innerHTML = '<p class="empty-state">No image loaded</p>';
+    });
+  </script>
+</body>
+</html>
