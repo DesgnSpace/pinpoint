@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-05-19T00:00:00.000Z",
+  "title": "Design System: Pinpoint",
+  "extensions": {
+    "colorMeta": {
+      "neutral-bg": { "role": "neutral", "displayName": "BG Main", "canonical": "#0d0d0f" },
+      "surface-bg": { "role": "neutral", "displayName": "Surface", "canonical": "#141417" },
+      "hover-bg": { "role": "neutral", "displayName": "Hover", "canonical": "#1e1e21" },
+      "border-subtle": { "role": "neutral", "displayName": "Border Subtle", "canonical": "#2a2a2d" },
+      "border-strong": { "role": "neutral", "displayName": "Border Strong", "canonical": "#e8e6e3" },
+      "text-primary": { "role": "neutral", "displayName": "Text Primary", "canonical": "#e8e6e3" },
+      "text-muted": { "role": "neutral", "displayName": "Text Muted", "canonical": "#8b8a88" },
+      "accent": { "role": "accent", "displayName": "Accent", "canonical": "#e8e6e3" },
+      "accent-hover": { "role": "accent", "displayName": "Accent Hover", "canonical": "#c8c4be" },
+      "sidebar-bg": { "role": "neutral", "displayName": "Sidebar BG", "canonical": "#0d0d0f" },
+      "sidebar-text": { "role": "neutral", "displayName": "Sidebar Text", "canonical": "#e8e6e3" },
+      "sidebar-muted": { "role": "neutral", "displayName": "Sidebar Muted", "canonical": "#8b8a88" },
+      "sidebar-faint": { "role": "neutral", "displayName": "Sidebar Faint", "canonical": "#6b6a68" },
+      "sidebar-border": { "role": "neutral", "displayName": "Sidebar Border", "canonical": "#2a2a2d" },
+      "sidebar-hover": { "role": "neutral", "displayName": "Sidebar Hover", "canonical": "#1e1e21" }
+    },
+    "typographyMeta": {
+      "body": { "displayName": "Body", "purpose": "All text, labels, values, instructions, metadata." },
+      "label": { "displayName": "Label", "purpose": "Section headers and column labels." },
+      "value": { "displayName": "Value", "purpose": "Raw coordinate values and data points." }
+    },
+    "motion": [
+      { "name": "ease-state", "value": "ease 0.2s", "purpose": "Default easing for state transitions (background, color, border-color, opacity)." }
+    ],
+    "breakpoints": []
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Action button in the URL input group.",
+      "html": "<button class=\"ds-btn-primary\">LOAD</button>",
+      "css": ".ds-btn-primary { padding: 12px 24px; background: #e8e6e3; color: #0d0d0f; border: 1px solid #e8e6e3; border-radius: 0; font-family: 'SF Mono','Segoe UI Mono','Roboto Mono',Menlo,monospace; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer; transition: background 0.2s cubic-bezier(0.25,1,0.5,1), color 0.2s cubic-bezier(0.25,1,0.5,1), border-color 0.2s cubic-bezier(0.25,1,0.5,1); } .ds-btn-primary:hover { background: #0d0d0f; color: #e8e6e3; } .ds-btn-primary:focus-visible { outline: 2px solid #e8e6e3; outline-offset: 2px; }"
+    },
+    {
+      "name": "Reset Button",
+      "kind": "button",
+      "refersTo": "reset-button",
+      "description": "Ghost-style button to reload a new image (in dark sidebar).",
+      "html": "<button class=\"ds-btn-reset\">LOAD NEW IMAGE</button>",
+      "css": ".ds-btn-reset { padding: 10px 24px; background: transparent; color: #e8e6e3; border: 1px solid #2a2a2d; border-radius: 0; width: 100%; font-family: 'SF Mono','Segoe UI Mono','Roboto Mono',Menlo,monospace; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer; transition: background 0.2s cubic-bezier(0.25,1,0.5,1), color 0.2s cubic-bezier(0.25,1,0.5,1), border-color 0.2s cubic-bezier(0.25,1,0.5,1); } .ds-btn-reset:hover { background: #0d0d0f; border-color: #e8e6e3; } .ds-btn-reset:focus-visible { outline: 2px solid #e8e6e3; outline-offset: 2px; }"
+    },
+    {
+      "name": "URL Input",
+      "kind": "input",
+      "refersTo": "url-input",
+      "description": "Text input for entering an image URL.",
+      "html": "<input class=\"ds-input-url\" type=\"text\" placeholder=\"Or enter image URL...\">",
+      "css": ".ds-input-url { flex: 1; padding: 12px; border: none; font-family: 'SF Mono','Segoe UI Mono','Roboto Mono',Menlo,monospace; font-size: 13px; outline: none; background: transparent; } .ds-input-url:focus { background: #f0eeeb; }"
+    },
+    {
+      "name": "Info Row",
+      "kind": "custom",
+      "refersTo": "info-row",
+      "description": "Label-value data row with copy-on-click (on dark sidebar).",
+      "html": "<div class=\"ds-info-row\" tabindex=\"0\" role=\"button\"><span class=\"ds-info-label\">X Position</span><span class=\"ds-info-value\">420px</span></div>",
+      "css": ".ds-info-row { display: flex; justify-content: space-between; align-items: baseline; padding: 6px 8px; margin: 0 -8px; cursor: pointer; border-radius: 4px; transition: background 0.15s cubic-bezier(0.25,1,0.5,1); background: #0d0d0f; color: #e8e6e3; } .ds-info-row:hover { background: #18181b; } .ds-info-row:focus-visible { outline: 2px solid #e8e6e3; outline-offset: -2px; } .ds-info-label { font-size: 12px; color: #6b6a68; letter-spacing: 0.2px; } .ds-info-value { font-size: 12px; font-weight: 500; color: #8b8a88; font-variant-numeric: tabular-nums; text-align: right; word-break: break-all; margin-left: 16px; } .ds-info-value.highlight { color: #e8e6e3; font-weight: 600; }"
+    },
+    {
+      "name": "Coordinate Hero",
+      "kind": "custom",
+      "refersTo": "coordinate-hero",
+      "description": "Featured coordinate readout at the top of the sidebar.",
+      "html": "<div class=\"ds-coord-hero\"><div class=\"ds-coord-row\"><span class=\"ds-coord-label\">X</span><span class=\"ds-coord-value\">420px</span></div><div class=\"ds-coord-row\"><span class=\"ds-coord-label\">Y</span><span class=\"ds-coord-value\">280px</span></div><div class=\"ds-coord-row\"><span class=\"ds-coord-label\">%</span><span class=\"ds-coord-value ds-coord-pct\">33.33% × 25.00%</span></div></div>",
+      "css": ".ds-coord-hero { padding: 16px 0 20px; border-bottom: 1px solid #1e1e21; margin-bottom: 20px; display: flex; flex-direction: column; gap: 8px; } .ds-coord-row { display: flex; justify-content: space-between; align-items: baseline; } .ds-coord-label { font-size: 11px; color: #6b6a68; letter-spacing: 0.2px; text-transform: uppercase; } .ds-coord-value { font-size: 13px; font-weight: 500; color: #e8e6e3; font-variant-numeric: tabular-nums; } .ds-coord-pct { color: #8b8a88; }"
+    },
+    {
+      "name": "Sidebar Header",
+      "kind": "custom",
+      "refersTo": "sidebar-header",
+      "description": "Fixed header with crosshair icon at the top of the sidebar.",
+      "html": "<div class=\"ds-sidebar-header\"><div class=\"ds-crosshair\"></div><div><div class=\"ds-header-label\">Pinpoint</div><div class=\"ds-header-sub\">Coordinate Inspector</div></div></div>",
+      "css": ".ds-sidebar-header { display: flex; align-items: center; gap: 10px; padding-bottom: 20px; border-bottom: 1px solid #1e1e21; margin-bottom: 24px; } .ds-crosshair { width: 14px; height: 14px; position: relative; flex-shrink: 0; } .ds-crosshair::before { content: ''; position: absolute; width: 100%; height: 1px; background: #8b8a88; top: 50%; left: 0; transform: translateY(-50%); } .ds-crosshair::after { content: ''; position: absolute; width: 1px; height: 100%; background: #8b8a88; left: 50%; top: 0; transform: translateX(-50%); } .ds-header-label { font-size: 11px; font-weight: 600; letter-spacing: 0.8px; text-transform: uppercase; color: #e8e6e3; } .ds-header-sub { font-size: 10px; color: #6b6a68; }"
+    },
+    {
+      "name": "Marker",
+      "kind": "custom",
+      "refersTo": "marker",
+      "description": "Crosshair ring marking a clicked position on the image.",
+      "html": "<div class=\"ds-marker\"></div>",
+      "css": ".ds-marker { position: absolute; width: 22px; height: 22px; border: 1.5px solid #fff; border-radius: 50%; background: transparent; pointer-events: none; box-shadow: 0 0 0 1px rgba(0,0,0,0.12); } .ds-marker::before, .ds-marker::after { content: ''; position: absolute; top: 50%; left: 50%; background: #fff; transform: translate(-50%, -50%); } .ds-marker::before { width: 100%; height: 1px; } .ds-marker::after { width: 1px; height: 100%; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Drafting Table",
+    "overview": "Pinpoint is a single-purpose measurement tool: drop an image, click a point, read the coordinates. The interface is fully dark — the chrome recedes so the image commands attention.",
+    "keyCharacteristics": [
+      "Full dark theme — interface recedes, image commands",
+      "Monospace throughout — every character is a measured unit",
+      "Light-on-dark typography with warm off-white text",
+      "Coordinate hero readout as the primary data surface",
+      "White crosshair marker — visible on any image"
+    ],
+    "rules": [
+      { "name": "The Flat Rule", "body": "All surfaces are coplanar. No shadows, no z-depth, no elevation.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do keep the interface dark (#0d0d0f) — the image is the only light source.",
+      "Do use light accent (#e8e6e3) for buttons and interactive states.",
+      "Do use monospace throughout — coordinates should tabulate.",
+      "Do keep the image area free of chrome — the image is the subject.",
+      "Do use direct click-to-copy on every data row."
+    ],
+    "donts": [
+      "Don't mix light and dark surfaces — the entire chrome layer is a single dark tone.",
+      "Don't use colored accents — light = active, dark = rest.",
+      "Don't add dashboards, charts, or multi-panel layouts.",
+      "Don't wrap the image in frames, cards, or containers with padding.",
+      "Don't animate layout properties — ease only background, color, border-color, opacity.",
+      "Don't use rounded buttons (radius > 0)."
+    ]
+  }
+}
